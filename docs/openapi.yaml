@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: API Backend Tótem POS Multimarca
+  description: API interna para manejar ventas en tótems mediante arquitectura Strategy desacoplada.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Local Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /sale:
+    post:
+      summary: Realizar una venta en el POS
+      description: Inicia el proceso de cobro pasándole el monto y el nro de ticket al modelo conectado del POS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                monto:
+                  type: number
+                  example: 5000
+                ticket:
+                  type: string
+                  example: "TKT-12345"
+              required:
+                - monto
+                - ticket
+      responses:
+        '200':
+          description: Venta procesada (puede ser SUCCESS o REJECTED dependiendo del POS)
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Faltan parámetros
+        '401':
+          description: Token no provisto
+        '403':
+          description: Token inválido
+        '500':
+          description: Error interno o caída del POS

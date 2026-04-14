@@ -1,0 +1,3 @@
+[pos]
+# Tipo de POS: POSAutoservicio o POSIntegrado
+type = "POSAutoservicio"

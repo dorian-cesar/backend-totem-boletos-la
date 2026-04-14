@@ -1,0 +1,35 @@
+{
+  "name": "backend-totem-boletos-la",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000-\u0000t\u0000o\u0000t\u0000e\u0000m\u0000-\u0000b\u0000o\u0000l\u0000e\u0000t\u0000o\u0000s\u0000-\u0000l\u0000a\u0000\r\u0000 \u0000",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dorian-cesar/backend-totem-boletos-la.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dorian-cesar/backend-totem-boletos-la/issues"
+  },
+  "homepage": "https://github.com/dorian-cesar/backend-totem-boletos-la#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.0",
+    "serialport": "^13.0.0",
+    "sqlite3": "^6.0.1",
+    "swagger-ui-express": "^5.0.1",
+    "toml": "^4.1.1",
+    "transbank-pos-sdk": "^4.0.0",
+    "yamljs": "^0.3.0"
+  }
+}
