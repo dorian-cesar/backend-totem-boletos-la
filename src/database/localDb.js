@@ -13,10 +13,19 @@ const getLocalDb = () => {
         monto REAL,
         ticket TEXT,
         estado_pos TEXT,
+        full_response TEXT,
         sync_status INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Migración automática: Agregar columna full_response si no existe
+    try {
+        db.exec('ALTER TABLE transactions ADD COLUMN full_response TEXT');
+    } catch (e) {
+        // La columna ya existe, ignoramos el error
+    }
+    
     return db;
 };
 

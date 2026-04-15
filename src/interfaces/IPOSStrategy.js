@@ -13,6 +13,10 @@ class IPOSStrategy {
     throw new Error("Method 'disconnect()' must be implemented.");
   }
 
+  async loadKeys() {
+    throw new Error("Method 'loadKeys()' must be implemented.");
+  }
+
   async sale(amount, ticket) {
     throw new Error("Method 'sale(amount, ticket)' must be implemented.");
   }

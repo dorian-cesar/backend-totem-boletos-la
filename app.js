@@ -4,21 +4,23 @@ const yaml = require('yamljs');
 const path = require('path');
 require('dotenv').config();
 
-const salesController = require('./src/controllers/SalesController');
-const authMiddleware = require('./src/middlewares/authMiddleware');
-
 const app = express();
 app.use(express.json());
+
+// Servir frontend
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Documentación Swagger
 const swaggerDocument = yaml.load(path.join(__dirname, './docs/openapi.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Rutas de API
-const router = express.Router();
-router.post('/sale', authMiddleware, salesController.createSale);
+// Importar rutas
+const salesRoutes = require('./src/routes/salesRoutes');
+const testRoutes = require('./src/routes/testRoutes');
 
-app.use('/api/v1', router);
+// Rutas de API
+app.use('/api/v1', salesRoutes);
+app.use('/api/v1', testRoutes);
 
 // Ruta base
 app.get('/', (req, res) => {

@@ -1,3 +1,5 @@
 [pos]
-# Tipo de POS: POSAutoservicio o POSIntegrado
 type = "POSAutoservicio"
+port = "COM29"
+baudRate = 115200
+ackTimeout = 10000
