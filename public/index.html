@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Terminal - Entorno de Pruebas API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --glass-bg: rgba(18, 24, 38, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+            --input-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+
+        .input-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        select.input-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+            padding-right: 2.5rem;
+        }
+        
+        select.input-control option { 
+            background: var(--bg-dark); 
+        }
+
+        .shortcuts {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .badge-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loader */
+        .spinner {
+            display: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Result Panel */
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+        }
+
+        .status-badge.success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-badge.error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+        .status-badge.pending { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
+
+        .terminal-box {
+            flex-grow: 1;
+            background: #050505;
+            border-radius: 12px;
+            padding: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .dot.r { background: #ef4444; }
+        .dot.y { background: #f59e0b; }
+        .dot.g { background: #10b981; }
+
+        pre {
+            color: #a78bfa;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            flex-grow: 1;
+        }
+
+        .key { color: #60a5fa; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+        .boolean { color: #f472b6; }
+        .null { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Configuration Panel -->
+        <div class="glass-panel">
+            <h1>Simulador POS</h1>
+            <p class="subtitle">Interfaz visual para probar las implementaciones de Abstract Factory nativamente a través de la API.</p>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="posType">Selecciona el tipo de POS (Abstract Factory)</label>
+                    <select id="posType" class="input-control" required>
+                        <option value="mock">Simulación Virtual (MockFactory)</option>
+                        <option value="transbank">Hardware Real (TransbankFactory)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="orderId">ID de Orden</label>
+                    <input type="text" id="orderId" class="input-control" value="ORD-1001" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Monto a Pagar ($)</label>
+                    <input type="number" id="amount" class="input-control" value="1500" required>
+                    <div class="shortcuts">
+                        <button type="button" class="badge-btn" onclick="setAmount(1500)">$1500 (Éxito)</button>
+                        <button type="button" class="badge-btn" onclick="setAmount(555)">$555 (Rechazo)</button>
+                        <button type="button" class="badge-btn" onclick="setAmount(999999)">Borde de Timeout (35s)</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span id="btnText">Procesar Transacción</span>
+                    <div class="spinner" id="btnSpinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Panel -->
+        <div class="glass-panel result-panel">
+            <div class="result-header">
+                <h2>Respuesta API</h2>
+                <span class="status-badge" id="statusBadge">Esperando Petición...</span>
+            </div>
+            
+            <div class="terminal-box">
+                <div class="terminal-header">
+                    <div class="dot r"></div>
+                    <div class="dot y"></div>
+                    <div class="dot g"></div>
+                </div>
+                <pre id="jsonOutput">
+// Esperando transacción...
+// POST /pay
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setAmount(val) {
+            document.getElementById('amount').value = val;
+        }
+
+        // Syntax Highlighter for JSON
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('btnSpinner');
+            const badge = document.getElementById('statusBadge');
+            const output = document.getElementById('jsonOutput');
+
+            // UI Loading state
+            btn.disabled = true;
+            btnText.textContent = "Procesando...";
+            spinner.style.display = "block";
+            badge.className = "status-badge pending";
+            badge.textContent = "Procesando...";
+            output.innerHTML = "// Llamando POST /pay...\n// Por favor espere hasta 30s en caso de timeout...";
+            
+            const payload = {
+                amount: parseInt(document.getElementById('amount').value, 10),
+                orderId: document.getElementById('orderId').value,
+                posType: document.getElementById('posType').value
+            };
+
+            try {
+                const response = await fetch('/pay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                // Represent validation
+                if (response.ok && data.success) {
+                    badge.className = "status-badge success";
+                    badge.textContent = "Exitosa (200)";
+                } else {
+                    badge.className = "status-badge error";
+                    badge.textContent = `Error (${response.status})`;
+                }
+
+                output.innerHTML = syntaxHighlight(data);
+
+            } catch (error) {
+                badge.className = "status-badge error";
+                badge.textContent = "Error de Red";
+                output.innerHTML = syntaxHighlight({
+                    success: false,
+                    errorType: "error_de_red",
+                    message: error.message
+                });
+            } finally {
+                // UI Reset
+                btn.disabled = false;
+                btnText.textContent = "Procesar Transacción";
+                spinner.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
