@@ -13,9 +13,11 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/serialport": "^8.0.5",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mysql2": "^3.22.0",
+    "serialport": "^13.0.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
     "transbank-pos-sdk": "^4.0.0",

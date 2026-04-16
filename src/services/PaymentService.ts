@@ -5,6 +5,7 @@ import { TransbankFactory } from '../infrastructure/pos/transbank/TransbankFacto
 import PaymentQueue from '../infrastructure/queue/PaymentQueue';
 import { AppError } from '../utils/errors';
 import { TransactionRepository, LocalTransaction } from '../infrastructure/repositories/TransactionRepository';
+import { PrinterService } from '../infrastructure/printer/PrinterService';
 
 export class PaymentService {
     private queue: PaymentQueue;
@@ -92,6 +93,12 @@ export class PaymentService {
                 status: 'PENDING_SYNC', // As if it's waiting for remote MySQL push
                 authorizationCode: result.authorizationCode
             });
+
+            // Disparar la impresión física del recibo (Asíncrono/Fire-and-forget)
+            // No usamos await aquí para que el usuario en el Tótem vea "Aprobado" 
+            // de inmediato mientras el papel sale de la máquina.
+            PrinterService.getInstance().printReceipt(orderId, amount, result.authorizationCode)
+                .catch(pErr => logger.error(`[Printer] Falló impresión crítica de orden ${orderId}`, { error: pErr.message }));
 
             return result;
 
