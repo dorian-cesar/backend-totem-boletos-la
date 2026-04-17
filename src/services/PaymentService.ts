@@ -94,11 +94,9 @@ export class PaymentService {
                 authorizationCode: result.authorizationCode
             });
 
-            // Disparar la impresión física del recibo (Asíncrono/Fire-and-forget)
-            // No usamos await aquí para que el usuario en el Tótem vea "Aprobado" 
-            // de inmediato mientras el papel sale de la máquina.
+            // Disparar la impresión física del recibo (Backend OS Spooler)
             PrinterService.getInstance().printReceipt(orderId, amount, result.authorizationCode)
-                .catch(pErr => logger.error(`[Printer] Falló impresión crítica de orden ${orderId}`, { error: pErr.message }));
+                .catch(pErr => logger.error(`[Printer] Falló impresión de la orden ${orderId}`, { error: pErr.message }));
 
             return result;
 

@@ -1,15 +1,15 @@
-import { SerialPort } from 'serialport';
 import logger from '../../utils/logger';
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
-/**
- * Service to handle the Samsung Thermal Kiosk Printer (ESC/POS)
- */
 export class PrinterService {
     private static instance: PrinterService;
-    private portName: string;
+    private printerName: string;
 
     private constructor() {
-        this.portName = process.env.PRINTER_PORT || 'COM4';
+        this.printerName = process.env.PRINTER_NAME || 'BIXOLON BK3-3(#1)';
+        logger.info(`[Printer] Inicializado mediante Windows Spooler para: ${this.printerName}`);
     }
 
     public static getInstance(): PrinterService {
@@ -19,78 +19,65 @@ export class PrinterService {
         return PrinterService.instance;
     }
 
-    /**
-     * Prints a standard receipt for a successful transaction
-     */
-    public async printReceipt(orderId: string, amount: number, authCode: string): Promise<void> {
+    public async printReceipt(orderId: string, amount: number, authCode?: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            logger.info(`[Printer] Abriendo puerto ${this.portName} para imprimir recibo...`);
-            
-            const port = new SerialPort({
-                path: this.portName,
-                baudRate: 9600, // Standard for many thermal printers, check manual if 115200 is needed
-                autoOpen: false,
-            });
-
-            port.open((err) => {
-                if (err) {
-                    logger.error(`[Printer] Error al abrir puerto: ${err.message}`);
-                    return reject(err);
-                }
-
-                logger.info(`[Printer] Puerto abierto. Enviando datos...`);
-
-                // ESC/POS Commands
-                const init = Buffer.from('\x1B\x40');        // Initialize
-                const center = Buffer.from('\x1B\x61\x01');  // Center
-                const left = Buffer.from('\x1B\x61\x00');    // Left
-                const boldOn = Buffer.from('\x1B\x45\x01');  // Bold on
-                const boldOff = Buffer.from('\x1B\x45\x00'); // Bold off
-                const lineFeed = Buffer.from('\x0A');        // Line feed
-                const cut = Buffer.from('\x1D\x56\x41\x03'); // Feed and Partial Cut (Standard)
+            try {
+                logger.info(`[Printer] Generando ticket a través del Spooler de Windows para la orden ${orderId}...`);
 
                 const now = new Date().toLocaleString();
+                const code = authCode || '123456';
 
-                port.write(init);
-                port.write(center);
-                port.write(boldOn);
-                port.write('--- RECIBO DE PAGO ---\n');
-                port.write(boldOff);
-                port.write(lineFeed);
-                
-                port.write(left);
-                port.write(`Fecha: ${now}\n`);
-                port.write(`Pedido: ${orderId}\n`);
-                port.write(`Monto: $${amount}\n`);
-                port.write(`Autorizacion: ${authCode}\n`);
-                
-                port.write(lineFeed);
-                port.write(center);
-                port.write('¡Gracias por su compra!\n');
-                port.write(lineFeed);
-                port.write(lineFeed);
-                port.write(lineFeed);
-                port.write(lineFeed);
-                
-                // Cut command
-                port.write(cut, (writeErr) => {
-                    if (writeErr) {
-                        logger.error(`[Printer] Error escribiendo en puerto: ${writeErr.message}`);
+                // Generamos un formato de texto crudo alineado
+                const receiptContent = `
+================================
+          MI COMERCIO
+    Plaza Central, Local 1
+     Tel: +56 9 0000 0000
+================================
+      --- RECIBO DE PAGO ---
+================================
+Fecha: ${now}
+Pedido: ${orderId}
+Autorizacion: ${code}
+
+TOTAL: $${amount}
+================================
+    ¡Gracias por su compra!
+
+        
+
+
+`; // Espacios al final para feed de papel
+
+                // Creamos un archivo temporal
+                const tempFilePath = path.join(__dirname, `ticket_${orderId}.txt`);
+                fs.writeFileSync(tempFilePath, receiptContent, 'utf8');
+
+                // Comando de PowerShell que envia el archivo crudo al driver de la impresora
+                const psCommand = `powershell -Command "Get-Content -Path '${tempFilePath}' | Out-Printer -Name '${this.printerName}'"`;
+
+                exec(psCommand, (error, stdout, stderr) => {
+                    // Borramos el archivo temporal
+                    try {
+                        if (fs.existsSync(tempFilePath)) {
+                            fs.unlinkSync(tempFilePath);
+                        }
+                    } catch (e) {
+                        logger.warn(`[Printer] No se pudo borrar el archivo temporal ${tempFilePath}`);
                     }
-                    
-                    // Close port after a small delay to ensure buffer is flushed
-                    setTimeout(() => {
-                        port.close();
-                        logger.info(`[Printer] Impresion completada y puerto cerrado.`);
-                        resolve();
-                    }, 500);
-                });
-            });
 
-            port.on('error', (err) => {
-                logger.error(`[Printer] Error de hardware: ${err.message}`);
+                    if (error) {
+                        logger.error(`[Printer] Fallo powershell Out-Printer`, { error: error.message });
+                        return reject(error);
+                    }
+
+                    logger.info(`[Printer] Impresion silenciosa exitosa en ${this.printerName}`);
+                    resolve(true);
+                });
+            } catch (err: any) {
+                logger.error('[Printer] Excepcion al procesar impresion cruda:', err);
                 reject(err);
-            });
+            }
         });
     }
 }

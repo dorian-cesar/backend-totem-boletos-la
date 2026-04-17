@@ -320,7 +320,9 @@
         <div class="glass-panel result-panel">
             <div class="result-header">
                 <h2>Respuesta API</h2>
-                <span class="status-badge" id="statusBadge">Esperando Petición...</span>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span class="status-badge" id="statusBadge">Esperando Petición...</span>
+                </div>
             </div>
             
             <div class="terminal-box">
@@ -423,6 +425,7 @@
                 spinner.style.display = "none";
             }
         });
+
     </script>
 </body>
 </html>
